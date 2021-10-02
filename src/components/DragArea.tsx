@@ -1,28 +1,20 @@
-import { useMutation } from "@apollo/client"
-import { motion } from "framer-motion"
-import { useState } from "react"
-import { useSelector } from "react-redux"
-import { RingLoader } from "react-spinners"
-import swal from "sweetalert"
-import { UPLOAD_IMAGE } from "../graphql/mutations"
-import { bytesToMb, isFile } from "../helpers"
-import lenguage from "../lenguage"
+import { useMutation } from '@apollo/client'
+import { motion } from 'framer-motion'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
+import { RingLoader } from 'react-spinners'
+import swal from 'sweetalert'
+import { UPLOAD_IMAGE } from '../graphql/mutations'
+import { bytesToMb, isFile } from '../helpers'
+import lenguage from '../lenguage'
 
-export const ImageUploadPage = () => {
-
-    return (
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-            <DragImageArea />
-        </div>
-    )
-}
-
-const DragImageArea = () => {
+const DragArea = ({filetype} : {filetype:'image'|'video'|'pdf'|'file'}) => {
+    
     const { leng } = useSelector((state:any) => state.lenguages)
     const [areDragIn, setAreDragIn] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [image, setImage] = useState(null)
     const [uploadImage, { data }] = useMutation(UPLOAD_IMAGE)
+    const [link, setLink] = useState(null)
 
     document.querySelector("body")!.addEventListener('drop', (e) => e.preventDefault())
     document.querySelector("body")!.addEventListener('dragover', (e) => e.preventDefault())
@@ -34,7 +26,6 @@ const DragImageArea = () => {
 
     const handleDrop = (e:React.DragEvent<HTMLDivElement>|any) => {
         e.preventDefault()
-
         setAreDragIn(false)
         checkAndUploadImage(e.dataTransfer.files[0])
     }
@@ -42,7 +33,7 @@ const DragImageArea = () => {
     const handleInputChange = (e:React.ChangeEvent<HTMLInputElement>|any) => checkAndUploadImage( e.target.files[0] )
 
     const checkAndUploadImage = async (image:File) => {
-        if(isFile(image, "image")){
+        if(isFile(image, filetype)){
             if(bytesToMb(image.size) > 7) swal({
                 title: leng === "es" ? lenguage.es.veryBig : lenguage.en.veryBig,
                 text: leng === "es" ? lenguage.es.maxSize : lenguage.en.maxSize,
@@ -107,3 +98,5 @@ const DragImageArea = () => {
         </motion.div>
     )
 }
+
+export default DragArea
